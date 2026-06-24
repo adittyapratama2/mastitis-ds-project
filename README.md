@@ -77,7 +77,8 @@ Dirancang untuk berjalan pada perangkat komputasi ringan dengan:
 | F1-Score               | ≥ 85%    | 98.51%       | ✅ PASS |
 | Akurasi Cross-Scenario | ≥ 90%    | 99.38%       | ✅ PASS |
 | Model Size             | < 10 MB  | 0.06 MB      | ✅ PASS |
-| P95 Latency            | < 50 ms  | < 3 ms       | ✅ PASS |
+| P95 Latency            | < 50 ms  | ~ 14.9 ms       | ✅ PASS |
+| Mean Latency           | < 50 ms  | ~ 14.1 ms       | ✅ PASS |
 | Peak RAM               | < 100 MB | < 2 MB       | ✅ PASS |
 
 ---
