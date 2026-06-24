@@ -1,31 +1,84 @@
-```markdown
 # Resource-Constrained Early Mastitis Decision Support System (DSS) 🐄
 
-Aplikasi Sistem Penunjang Keputusan (DSS) preskriptif berbasis *Edge Computing* untuk deteksi dini penyakit Mastitis Subklinis pada sapi perah menggunakan algoritma **Random Forest** dan **Explainable AI (SHAP)**. Sistem ini dioptimalkan khusus untuk berjalan pada perangkat komputasi lokal kandang berspesifikasi rendah (*Resource-Constrained Environment*).
+Sistem Penunjang Keputusan preskriptif berbasis *Edge Computing* untuk deteksi dini Mastitis Subklinis pada sapi perah. Menggunakan **Random Forest** dengan **Explainable AI (SHAP)** dan **Dual-Scenario Validation** yang dioptimalkan untuk perangkat komputasi lokal berspesifikasi rendah.
 
 ---
 
 ## 📌 Fitur Utama & Keunggulan Sistem
 
-1. **Dual-Layer Architecture:** * *Safety Alert Layer (Rule-Based):* Proteksi hulu deterministik instant bypass untuk kasus Mastitis Klinis akut.
-   * *Predictive Machine Learning Path:* Model probabilistik untuk mendeteksi area abu-abu Mastitis Subklinis tersembunyi.
-2. **Explainable AI (XAI) Grounded:** Integrasi lokal pustaka SHAP secara *runtime* untuk membongkar sifat *black-box* model dan mendeteksi akar masalah fisiologis utama sapi (*root cause identification*).
-3. **Prescriptive Analytics Actionable Triage:** Menghasilkan rekomendasi tindakan medis lapangan spesifik dan dinamis berdasarkan kombinasi tingkat risiko penyakit dan kontribusi variabel fitur SHAP.
-4. **Production-Grade Edge Footprint:** Beban memori dan latensi super hemat untuk menjamin reliabilitas *mini-PC* lokal kandang tanpa ancaman *Out-of-Memory (OOM) crash*.
+### 1. Dual-Scenario Data Pipeline
+
+Menghasilkan dua jenis dataset:
+
+* **Empirical Dataset** (berbasis data nyata)
+* **Synthetic Dataset** (dengan domain drift terkontrol)
+
+Pendekatan ini memungkinkan evaluasi kemampuan generalisasi model terhadap perubahan distribusi data.
+
+### 2. Dual-Layer Safety Architecture
+
+#### Clinical Safety Bypass
+
+Deteksi instan untuk kondisi akut:
+
+* Suhu tubuh ≥ 40°C
+* Milk Conductivity ≥ 6.5 mS/cm
+
+#### Predictive Machine Learning Path
+
+Menggunakan Random Forest untuk mendeteksi risiko mastitis subklinis sebelum gejala klinis muncul.
+
+### 3. Explainable AI (XAI)
+
+Integrasi SHAP (*SHapley Additive exPlanations*) memungkinkan:
+
+* Identifikasi faktor fisiologis paling berpengaruh
+* Transparansi proses prediksi
+* Dukungan pengambilan keputusan yang dapat dijelaskan
+
+### 4. Prescriptive Analytics Dinamis
+
+Rekomendasi tindakan disesuaikan berdasarkan akar penyebab utama (*root cause*) seperti:
+
+* Body Temperature
+* Milk Conductivity
+* Milk Yield
+* Heart Rate
+* Rumination
+
+### 5. Cross-Scenario Validation Matrix
+
+Evaluasi dilakukan pada empat kombinasi pelatihan dan pengujian:
+
+| Training  | Testing   |
+| --------- | --------- |
+| Empirical | Empirical |
+| Synthetic | Synthetic |
+| Empirical | Synthetic |
+| Synthetic | Empirical |
+
+Tujuannya adalah mengukur ketahanan model terhadap *domain shift*.
+
+### 6. Edge-Optimized Architecture
+
+Dirancang untuk berjalan pada perangkat komputasi ringan dengan:
+
+* Ukuran model sangat kecil
+* Latensi inferensi rendah
+* Konsumsi RAM minimal
 
 ---
 
-## 📊 Hasil Audit & Metrik Performa Perangkat Lokal (Edge Node)
+## 📊 Hasil Audit dan Metrik Performa
 
-Berdasarkan hasil eksekusi riil dari skrip pengujian otomatis (`test_suite.py`) dan profiler memori (`memory_audit.py`) pada mesin lokal, sistem berhasil mengunci indikator performa sebagai berikut:
-
-| Parameter Evaluasi | Target Batasan Operasional | Hasil Aktual Eksperimen | Status Kelayakan |
-| :--- | :--- | :--- | :--- |
-| **Sensitivitas (Recall)** | $\ge 90.00\%$ | **92.50%** (30% Domain Drift) | **PASSED** |
-| **F1-Score** | $\ge 85.00\%$ | **86.55%** | **PASSED** |
-| **Model Disk Size** | $< 10.0\text{ MB}$ | **0.2474 MB** (`.pkl` file) | **PASSED** |
-| **Inference Latency P95** | $< 50.0\text{ ms}$ | **15.7683 ms** | **PASSED** |
-| **Peak RAM Memory** | $< 100.0\text{ MB}$ | **1.7226 MB** (Tracemalloc Audit) | **PASSED** |
+| Parameter              | Target   | Hasil Aktual | Status |
+| ---------------------- | -------- | ------------ | ------ |
+| Recall (Drift 30%)     | ≥ 90%    | 97.06%       | ✅ PASS |
+| F1-Score               | ≥ 85%    | 98.51%       | ✅ PASS |
+| Akurasi Cross-Scenario | ≥ 90%    | 99.38%       | ✅ PASS |
+| Model Size             | < 10 MB  | 0.06 MB      | ✅ PASS |
+| P95 Latency            | < 50 ms  | < 3 ms       | ✅ PASS |
+| Peak RAM               | < 100 MB | < 2 MB       | ✅ PASS |
 
 ---
 
@@ -34,108 +87,250 @@ Berdasarkan hasil eksekusi riil dari skrip pengujian otomatis (`test_suite.py`) 
 ```text
 mastitis-ds-project/
 ├── data/
-│   ├── test_mastitis_edge.csv    # Dataset uji independen
-│   └── train_mastitis_edge.csv   # Dataset latih informed-stochastic
+│   ├── train_empirical.csv
+│   ├── test_empirical.csv
+│   ├── train_synthetic.csv
+│   └── test_synthetic.csv
+│
+├── docs/
+│   └── cow_milk_mastitis_dataset.csv
+│
 ├── models/
-│   └── mastitis_model_v1.pkl     # Berkas biner model Random Forest (0.24 MB)
+│   ├── mastitis_model_empirical.pkl
+│   ├── mastitis_model_synthetic.pkl
+│   ├── feature_importance_empirical.csv
+│   ├── feature_importance_synthetic.csv
+│   └── cross_validation_report.csv
+│
 ├── src/
-│   ├── app.py                    # Frontend Dashboard Utama (Streamlit Application)
-│   ├── engine.py                 # Core Bisnis Logika, Safety Layer, & SHAP Runtime
-│   ├── generator.py              # Generator Stochastic Multivariat Terkorelasi
-│   ├── memory_audit.py           # Utilitas Profiler RAM Tracemalloc
-│   └── test_suite.py             # Automated Boundary Value & Stress Testing
-├── requirements.txt              # Daftar dependensi modul python
-└── README.md                     # Dokumentasi utama proyek
-
+│   ├── data_fusion.py
+│   ├── train_dual.py
+│   ├── engine_dual.py
+│   ├── app_dual.py
+│   ├── test_suite.py
+│   └── memory_audit.py
+│
+├── requirements.txt
+└── README.md
 ```
 
 ---
 
-## 🛠️ Panduan Instalasi & Operasional Perangkat
+## 🛠️ Instalasi
 
-Pastikan sistem operasi Anda sudah terpasang Python 3.11+ dan pustaka virtual environment (`venv`). Execution di terminal root folder proyek:
-
-### 1. Inisialisasi Environment & Install Dependensi
+### 1. Clone Repository
 
 ```bash
-# Membuat virtual environment terisolasi
+git clone https://github.com/adittyapratama2/mastitis-ds-project.git
+cd mastitis-ds-project
+```
+
+### 2. Membuat Virtual Environment
+
+Linux/macOS:
+
+```bash
 python -m venv venv
-
-# Aktivasi environment (Linux/macOS)
 source venv/bin/activate
-
-# Install dependensi core, frontend UI, dan XAI secara bersamaan
-./venv/bin/pip install -r requirements.txt
-
 ```
 
-*Catatan: Isi dari file `requirements.txt` minimal wajib mencakup: `scikit-learn`, `joblib`, `pandas`, `numpy`, `shap`, `matplotlib`, `streamlit`.*
+Windows:
 
-### 2. Eksekusi Jalur Siklus Hidup Kode
-
-* **Skenario Latih Model Ulang (Jika Data Berubah):**
 ```bash
-python src/generator.py && python src/train.py
-
+python -m venv venv
+venv\Scripts\activate
 ```
 
+### 3. Install Dependency
 
-* **Menjalankan Automated Test Suite (Fungsional, Batas Ambang, & Latensi):**
+```bash
+pip install -r requirements.txt
+```
+
+---
+
+## 📦 Tahap 1 - Generate Dataset
+
+Pipeline menghasilkan:
+
+* Dataset Empirical
+* Dataset Synthetic
+* Train/Test Split untuk masing-masing skenario
+
+Jalankan:
+
+```bash
+python src/data_fusion.py
+```
+
+Output:
+
+```text
+data/
+├── train_empirical.csv
+├── test_empirical.csv
+├── train_synthetic.csv
+└── test_synthetic.csv
+```
+
+---
+
+## 🤖 Tahap 2 - Training dan Validasi
+
+Melatih dua model Random Forest:
+
+* Model Empirical
+* Model Synthetic
+
+Sekaligus menghasilkan:
+
+* Feature Importance
+* Cross Validation Matrix
+* Latency Benchmark
+
+Jalankan:
+
+```bash
+python src/train_dual.py
+```
+
+Output:
+
+```text
+models/
+├── mastitis_model_empirical.pkl
+├── mastitis_model_synthetic.pkl
+├── feature_importance_empirical.csv
+├── feature_importance_synthetic.csv
+└── cross_validation_report.csv
+```
+
+---
+
+## 🧪 Tahap 3 - Menjalankan Test Suite
+
+Melakukan:
+
+* Functional Testing
+* Clinical Safety Testing
+* Stress Testing
+* Inference Benchmarking
+
+Jalankan:
+
 ```bash
 python src/test_suite.py
-
 ```
-
-
-* **Menjalankan Profiler Puncak Alokasi RAM:**
-```bash
-python src/memory_audit.py
-
-```
-
-
-* **Menyalakan Aplikasi Dashboard Streamlit Lokal Kandang:**
-```bash
-python -m streamlit run src/app.py
-
-```
-
-
 
 ---
 
-## 🧩 Kontrak Logika Data (API Response Specification)
+## 📈 Tahap 4 - Menjalankan Dashboard
 
-Fungsi `process_reading()` pada `LivestockPrescriptiveEngine` menerima payload masukan telemetri mentah dari sensor IoT dan memprosesnya menjadi respon JSON terstandardisasi terformat di bawah ini:
+Dashboard berbasis Streamlit mendukung:
+
+* Pemilihan model Empirical/Synthetic
+* SHAP Visualization
+* Risk Assessment
+* Prescriptive Recommendation
+
+Jalankan:
+
+```bash
+streamlit run src/app_dual.py
+```
+
+Kemudian buka browser:
+
+```text
+http://localhost:8501
+```
+
+---
+
+## 🔄 Alur Sistem
+
+```text
+Sensor Data
+      │
+      ▼
+Clinical Safety Bypass
+      │
+      ├── Acute Case
+      │      ▼
+      │   Immediate Action
+      │
+      ▼
+Random Forest Prediction
+      │
+      ▼
+SHAP Explainability
+      │
+      ▼
+Root Cause Analysis
+      │
+      ▼
+Prescriptive Recommendation
+      │
+      ▼
+Decision Support Output
+```
+
+---
+
+## 📋 Contoh Response Engine
+
+Fungsi `process_inference()` menghasilkan keluaran seperti berikut:
 
 ```json
 {
-  "prediction": "Suspected Subclinical Mastitis",
-  "probability": 0.9990,
-  "confidence": 0.9990,
+  "status": "SUCCESS",
+  "prediction": 1,
+  "probability": 0.9876,
+  "confidence": 0.9876,
   "risk_tier": "HIGH",
+  "action_code": "ISOLATE_AND_TEST",
   "root_cause": "Milk Conductivity",
-  "root_cause_impact": 0.2196,
-  "action_code": "VET_CONSULT",
-  "inference_time_ms": 20.65,
+  "root_cause_impact": 0.4321,
+  "inference_time_ms": 2.34,
   "meta": {
-    "message": "Risiko tinggi subclinical mastitis. Diperlukan isolasi dan intervensi medis.\n\nTindakan Spesifik (XAI Grounded): Lakukan CMT test segera, pisahkan fluks susu terinfeksi, dan jadwalkan konsultasi veteriner.",
-    "timeline": "12 jam",
-    "urgency": "HIGH"
-  }
+    "urgency": "TINGGI (Segera Tindak)",
+    "timeline": "Dalam waktu < 3 Jam",
+    "message": "Lonjakan konduktivitas listrik terdeteksi."
+  },
+  "features_used": {}
 }
-
 ```
 
 ---
 
-## 👥 Kontributor Proyek Kelompok 3 Data Science
+## 🎯 Kontribusi Akademik
 
-* **Adittya Pratama     - 25.55.2838** 
-* **Tedy Nurkholis      - 25.55.2859** 
-* **Randi Okta Miranda  - 25.55.2855** 
-* **Janulius            - 25.55.2848** 
+Penelitian ini mengusulkan pendekatan:
 
-```
+**Resource-Constrained Explainable Prescriptive Decision Support System for Early Mastitis Detection Using Dual-Scenario Validation on Edge Devices**
+
+Kontribusi utama:
+
+1. Integrasi Explainable AI (SHAP) pada perangkat Edge.
+2. Prescriptive Analytics berbasis akar penyebab fisiologis.
+3. Dual-Scenario Validation untuk evaluasi ketahanan domain.
+4. Arsitektur ringan untuk lingkungan peternakan dengan sumber daya terbatas.
 
 ---
+
+## 👨‍💻 Tim Pengembang
+
+### Kelompok 3 – Data Science
+
+| Nama               | NIM        |
+| ------------------ | ---------- |
+| Adittya Pratama    | 25.55.2838 |
+| Tedy Nurkholis     | 25.55.2859 |
+| Randi Okta Miranda | 25.55.2855 |
+| Janulius           | 25.55.2848 |
+
+---
+
+## 📄 Lisensi
+
+Proyek ini dikembangkan untuk kebutuhan akademik Program Magister Informatika dan penelitian sistem pendukung keputusan berbasis Data Science.
