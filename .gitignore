@@ -1,0 +1,44 @@
+# =========================================================================
+# .gitignore - Mastitis Data Science Project (Edge Prescriptive DSS)
+# =========================================================================
+
+# 1. Python Virtual Environment (Wajib di-ignore!)
+# Kita tidak boleh memasang library mentah di Git. Cukup requirements.txt saja.
+venv/
+.venv/
+env/
+ENV/
+
+# 2. Python Cache & Bytecode Compilation
+# Berkas otomatis yang di-generate Python saat eksekusi skrip
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+
+# 3. Streamlit & Matplotlib Runtime Cache
+# Cache internal runtime Streamlit agar tidak mengotori repositori kelompok
+.streamlit/config.toml
+.streamlit/secrets.toml
+*.gv
+*.svg
+*.png-c75062c7-*
+*.pdf
+
+# 4. OS & IDE Metadata (VS Code / JetBrains / Mac)
+# Konfigurasi personal text editor masing-masing anggota kelompok
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# 5. Data Science Logs & Memory Profiling Logs
+# Hasil log tracking dari tracemalloc atau data profiling sementara
+*.log
+.tracemalloc_cache/
+
+# 6. Large Datasets / Database Local (Kondisional)
+# Jika database SQLite dikunci hanya untuk pengujian lokal, silakan uncomment baris di bawah:
+# *.db
+# *.sqlite3

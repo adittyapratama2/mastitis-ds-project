@@ -1,0 +1,5 @@
+train_set,test_set,accuracy,precision,recall,f1_score,roc_auc,mean_latency_ms,p95_latency_ms
+empirical,empirical,0.9938,1.0,0.9706,0.9851,1.0,14.139,14.9794
+synthetic,synthetic,0.9938,1.0,0.9706,0.9851,1.0,15.0031,16.7755
+empirical,synthetic,0.9938,1.0,0.9706,0.9851,0.9995,14.139,14.9794
+synthetic,empirical,0.9938,1.0,0.9706,0.9851,1.0,15.0031,16.7755
