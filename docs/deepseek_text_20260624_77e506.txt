@@ -1,0 +1,53 @@
+                          DATA STORE
+                    +------------------+
+                    |  /data/*.csv     |
+                    |  (Dataset Riil)  |
+                    +--------+---------+
+                             | (baca data latih)
+                             v
++---------------------------------------------------------------+
+|  PROSES 1: DATA PREPARATION & FUSION (data_fusion.py)         |
+|  - Kalibrasi Suhu (+3.5°C)                                    |
+|  - Korelasi Berantai (HR dari Suhu, Ruminasi dari Kond.)      |
+|  - Stratified Split (80:20)                                   |
+|  - Domain Drift 30% (Skenario Sintetis)                       |
++----------------------------+----------------------------------+
+                             | (hasil 4 file CSV)
+                             v
+                    DATA STORE
+                    +------------------+
+                    |  /data/*.csv     |
+                    |  (Train/Test)    |
+                    +--------+---------+
+                             | (baca data training)
+                             v
++---------------------------------------------------------------+
+|  PROSES 2: PELATIHAN MODEL (train_dual.py)                    |
+|  - Random Forest (n=50, depth=10)                             |
+|  - OOB Validation                                             |
+|  - Cross-Scenario Validation (4 skenario)                     |
+|  - Audit Ukuran & Latency                                     |
++----------------------------+----------------------------------+
+                             | (simpan model .pkl)
+                             v
+                    DATA STORE
+                    +------------------+
+                    |  /models/*.pkl   |
+                    |  (Model Biner)   |
+                    +--------+---------+
+                             | (load model)
+                             v
++---------------------------------------------------------------+
+|  PROSES 3: INFERENSI & PRESKRIPSI (engine_dual.py)            |
+|  - Step 1: Safety Bypass (Suhu ≥40 / Kond ≥6.5)              |
+|  - Step 2: ML Predict (Random Forest)                         |
+|  - Step 3: SHAP XAI (Root Cause)                              |
+|  - Step 4: Rule-Engine (Triage + Rekomendasi)                 |
++----------------------------+----------------------------------+
+                             | (kirim hasil JSON)
+                             v
++---------------------------------------------------------------+
+|  PROSES 4: VISUALISASI & INTERAKSI (app_dual.py)              |
+|  - Dashboard Streamlit                                        |
+|  - Menampilkan: Probabilitas, Triage, Grafik SHAP, Rekomendasi |
++---------------------------------------------------------------+
